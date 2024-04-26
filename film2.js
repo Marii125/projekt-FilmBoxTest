@@ -105,17 +105,10 @@ const filmy = [
   },
 ];
 
-const datumPremiery = () => {
+const nastavDatumPremiery = (datumPremiery) => {
   const premieraEl = document.querySelector('#premiera');
-  let idFilmu = window.location.hash.slice(1);
-  let jedenFilm = ''; //tady je to prazdny protoze parametr film ve foreach je jen uvnitr toho a my pak chceme mimo to pouzit to dayjs v promenny premiera takze musime doplnit mimo foreach prazdnej retezec a pak se to tam doplni co potrebujem
-  filmy.forEach((film) => {
-    if (idFilmu === film.id) {
-      jedenFilm = film;
-    }
-  });
 
-  const premiera = dayjs(jedenFilm.premiera).format('D. M. YYYY');
+  const premiera = dayjs(datumPremiery).format('D. M. YYYY');
   premieraEl.innerHTML = `<strong>${premiera}</strong>`;
 };
 
@@ -133,10 +126,10 @@ const propojeni = () => {
       nazevFilm.textContent = `${film.nazev}`;
       let popis = document.querySelector('.card-text');
       popis.textContent = `${film.popis}`;
-      datumPremiery();
 
       //jedenFilm = film; v2
 
+      nastavDatumPremiery(film.premiera);
       //const premiera = dayjs(jedenFilm.premiera).format('D. M. YYYY'); v2
       //premieraEl.innerHTML = `<strong>${premiera}</strong>`; v2
     }
@@ -144,15 +137,22 @@ const propojeni = () => {
 };
 propojeni();
 
-//1zpusob obarveni hvezdicek na kliknuti
+const star = document.querySelectorAll('.fa-star');
+
 const click = (event) => {
-  event.target.classList.add('fas');
+  const hhh = event.target.textContent;
+  console.log(hhh);
+  starElm(hhh);
 };
+
+star.forEach((oneStar) => {
+  oneStar.addEventListener('click', click);
+});
 
 const starElm = (numberOfStar) => {
   star.forEach((oneStar) => {
     //debugger;
-    oneStar.addEventListener('click', click);
+
     if (numberOfStar >= oneStar.textContent) {
       oneStar.classList.remove('far');
       oneStar.classList.add('fas');
@@ -162,4 +162,53 @@ const starElm = (numberOfStar) => {
     }
   });
 };
-starElm();
+
+//8-poznamka
+const formElm = document.querySelector('#note-form');
+formElm.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const messageElem = document.querySelector('#message-input');
+  const messageInput = messageElem.value;
+  if (messageInput.length === 0) {
+    messageElem.classList.add('is-invalid');
+    messageElem.focus();
+  }
+
+  const checkbox = document.querySelector('#terms-checkbox');
+  if (checkbox.checked === false) {
+    checkbox.classList.add('is-invalid');
+    checkbox.focus();
+  }
+  if (messageInput.length > 0 && checkbox.checked === true) {
+    formElm.innerHTML = `<p class="card-text">${messageInput}</p>`;
+  }
+});
+
+const idEllmplay = document.querySelector('#prehravac');
+console.log(idEllmplay);
+if (idEllmplay !== null) {
+  //tady davame nerovna se null protoze kdyz jsem zkousela pripsat blbost pri hledani prehravace napr.("#prehravacxxxxx") tak to napsalo null  nestaci dat treba === true nebo false a znamena to tedy : pukud prehravac se nerovna null(jakoze tam je na strance)  tak pridej tuto podminku
+  document.querySelector('.play').addEventListener('click', () => {
+    const video = document.querySelector('video');
+    video.play();
+    video.addEventListener('playing', () => {
+      idEllmplay.classList.add('playing');
+    });
+
+    const pauseButton = document.querySelector('.pause');
+    pauseButton.addEventListener('click', () => {
+      video.pause();
+      idEllmplay.classList.remove('playing');
+    });
+
+    const videoTime = document.querySelector('.current-time');
+    video.addEventListener('timeupdate', () => {
+      let currentTime = Math.round(video.currentTime);
+      console.log(videoTime);
+      const minutes = Math.round(currentTime / 60);
+      console.log(minutes);
+      videoTime.textContent = `${currentTime}: ${minutes}`;
+    });
+  });
+}
